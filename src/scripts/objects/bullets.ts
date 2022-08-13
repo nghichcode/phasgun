@@ -1,14 +1,22 @@
 import Phaser from "phaser";
 import {DEFAULT_HEIGHT} from "../game";
+import MainScene from "../scenes/mainScene";
 
 export class Bullet extends Phaser.Physics.Arcade.Sprite {
+  mainScene: MainScene
+
   constructor(scene, x, y) {
     super(scene, x, y, 'explosion-gas', 'Explosion_gas_circle1.png');
+  }
+
+  setMainScene(mainScene: MainScene) {
+    if (!this.mainScene) this.mainScene = mainScene
   }
 
   fire(x, y) {
     this.anims.play('explosion-gas-default')
     this.body.reset(x, y);
+    this.setDepth(1);
     this.setActive(true);
     this.setVisible(true);
     this.setVelocityX(600);

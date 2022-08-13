@@ -4,8 +4,13 @@ export default class PreloadScene extends Phaser.Scene {
   }
 
   preload() {
+    this.load.audio('hit', 'assets/sound/Hit.wav')
+    this.load.audio('shot', 'assets/sound/Shot.wav')
+    this.load.audio('whoosh', 'assets/sound/Whoosh.wav')
+    this.load.audio('spawn', 'assets/sound/Spawn.wav')
     this.load.image('phaser-logo', 'assets/img/phaser-logo.png')
     this.load.image('game_background', 'assets/img/game_background.png')
+    this.load.image('button-primary', 'assets/img/button-primary.png')
     this.load.image('pad_1_3', 'assets/img/pads/Pad_1_3.png')
     this.load.atlas('wraith-pack',
       'assets/img/wraith-pack/wraith.png',
@@ -18,7 +23,7 @@ export default class PreloadScene extends Phaser.Scene {
   }
 
   create() {
-    this.scene.start('MainScene')
+    this.scene.start('PreviewScene')
 
     /**
      * This is how you would dynamically import the mainScene class (with code splitting),

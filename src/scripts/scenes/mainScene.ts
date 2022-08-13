@@ -9,13 +9,24 @@ const CHARACTER_X = 100
 export default class MainScene extends Phaser.Scene {
   private static DEFAULT_LAND_X = 120
   private static DEFAULT_LAND_Y = 580
+  private static maxH = 180
 
   private fpsText
+  private background
+  public soundHit: Phaser.Sound.BaseSound
+  public soundShot: Phaser.Sound.BaseSound
+  public soundWhoosh: Phaser.Sound.BaseSound
+  public soundSpawn: Phaser.Sound.BaseSound
 
   private player
   private platforms
   private landList: Array<any> = []
   private bullets
+
+  private btnA
+  private isJump = false
+  private isFire = false
+  private btnB
 
   private cursors
   private maxY: number = 0
@@ -25,23 +36,56 @@ export default class MainScene extends Phaser.Scene {
   }
 
   create() {
-    this.add.image(DEFAULT_WIDTH / 2, DEFAULT_HEIGHT / 2, 'game_background')
-      .setScrollFactor(0)
+    const game = this
+    this.background = this.add.tileSprite(0, 0, DEFAULT_WIDTH, DEFAULT_HEIGHT, "game_background")
+      .setOrigin(0)
+      .setScrollFactor(0, 0);
     this.fpsText = new FpsText(this)
     this.cursors = this.input.keyboard.createCursorKeys()
     this.platforms = this.physics.add.staticGroup();
+    this.soundHit = this.sound.add('hit');
+    this.soundShot = this.sound.add('shot');
+    this.soundWhoosh = this.sound.add('whoosh');
+    this.soundSpawn = this.sound.add('spawn');
 
     for (let i = 0; i < 8; i++) {
       this.generateFromPrevLand()
     }
 
+    game.btnA = this.add.sprite(1100, 620, 'button-primary')
+      .setScale(0.5).setInteractive()
+      .setScrollFactor(0, 0)
+    game.btnA.on('pointerdown', function (pointer) {
+      game.isJump = true
+      game.btnA.setAlpha(0.8)
+    });
+    game.btnA.on('pointerup', function (pointer) {
+      game.isJump = false
+      game.btnA.setAlpha(1)
+    });
+    game.btnB = this.add.sprite(200, 620, 'button-primary')
+      .setScale(0.5).setInteractive()
+      .setScrollFactor(0, 0)
+    global.btnA = this.btnA
+    game.btnB.on('pointerdown', function (pointer) {
+      game.soundSpawn.play()
+      game.bullets.fireBullet(game.player.x + 20, game.player.y);
+      game.isFire = true
+      game.btnB.setAlpha(0.8)
+    });
+    game.btnB.on('pointerup', function (pointer) {
+      game.isFire = false
+      game.btnB.setAlpha(1)
+    });
+
     this.player = this.physics.add.sprite(CHARACTER_X, 440, 'wraith-pack', 'Wraith_01_Idle Blinking_001.png')
     this.player.collideWorldBounds = true
     this.player.setSize(this.player.body.width - 80, this.player.body.height)
       .setScale(0.4).refreshBody()
+    this.player.setDepth(1)
     this.player.setBounce(0.2)
     this.physics.add.collider(this.player, this.platforms)
-    this.cameras.main.startFollow(this.player, false, 1, 1, -DEFAULT_WIDTH / 2 + 200, 0);
+    this.cameras.main.startFollow(this.player, false, 1, 1, -DEFAULT_WIDTH / 2 + 200, 0)
 
     this.anims.create({
       key: 'idle',
@@ -81,33 +125,36 @@ export default class MainScene extends Phaser.Scene {
     this.physics.add.collider(this.bullets, this.platforms, (_bulletObj, _platformsObj) => {
       if (_bulletObj) {
         const _bullet = (_bulletObj as Bullet)
+        if (_bullet.active) this.soundHit?.play()
         _bullet.anims.play('explosion-gas', true)
         _bullet.setVelocity(0, 0);
       }
     })
     this.input.keyboard.on('keydown-SPACE', (pointer) => {
+      this.soundSpawn.play()
       this.bullets.fireBullet(this.player.x + 20, this.player.y);
     })
     this.input.keyboard.on('keydown-P', (pointer) => {
-      if (this.scene.isPaused('MainScene')) this.scene.resume('MainScene')
-      else this.scene.pause('MainScene')
+      if (this.scene.isPaused()) this.scene.resume()
+      else this.scene.pause()
     })
+    // this.input.on('pointer', (pointer) => {
+    //   console.log(1121)
+    //   this.player.anims.play('walking', true)
+    //   this.player.setVelocityX(MainScene.maxH)
+    // })
   }
 
   update() {
     const cursors = this.cursors
     const player = this.player
-    const maxH = 180
     this.fpsText.update()
 
-    if (cursors.left.isDown) {
+    if (cursors.right.isDown || (
+      this.input.activePointer.isDown && this.isJump
+    )) {
       player.anims.play('walking', true)
-      player.setVelocityX(-maxH)
-      player.flipX = true
-    } else if (cursors.right.isDown) {
-      player.anims.play('walking', true)
-      player.setVelocityX(maxH)
-      player.flipX = false
+      player.setVelocityX(MainScene.maxH)
     } else if (cursors.space.isDown) {
       player.anims.play('attack', true)
     } else {
@@ -118,11 +165,9 @@ export default class MainScene extends Phaser.Scene {
     }
 
     if (player.body.touching.down) {
+      this.soundWhoosh.play()
       player.setVelocityY(-330)
     }
-    // if ((cursors.up.isDown || cursors.space.isDown) && player.body.touching.down) {
-    //   player.setVelocityY(-330)
-    // }
     const firstLand = this.landList.length > 0 ? this.landList[0] : null
     if (firstLand && firstLand.x < player.x - CHARACTER_X * 3) {
       firstLand.destroy()
@@ -132,6 +177,7 @@ export default class MainScene extends Phaser.Scene {
       this.generateFromPrevLand()
     }
     if (player.y > this.maxY + DEFAULT_HEIGHT) this.scene.pause()
+    this.background.setTilePosition(this.cameras.main.scrollX)
   }
 
   generateFromPrevLand() {

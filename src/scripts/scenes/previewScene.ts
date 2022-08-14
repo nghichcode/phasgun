@@ -1,17 +1,16 @@
 import {DEFAULT_HEIGHT, DEFAULT_WIDTH} from "../game";
 import PrimaryButtonText from "../objects/primaryButtonText";
+import {getRootStoreVal} from "../models";
+import {autorun} from "mobx";
 
 export default class PreviewScene extends Phaser.Scene {
-  private enableSound: boolean = false
-
   constructor() {
     super({key: 'PreviewScene'})
   }
 
   create() {
+    const store = getRootStoreVal()
     const MIN_Y = 200
-    const BUTTON_PRIMARY_WIDTH = 398
-    const BUTTON_PRIMARY_HEIGHT = 176
     const game = this
 
     this.add.tileSprite(0, 0, DEFAULT_WIDTH, DEFAULT_HEIGHT, "game_background")
@@ -33,14 +32,13 @@ export default class PreviewScene extends Phaser.Scene {
     });
     const btnSound = this.add.sprite(DEFAULT_WIDTH / 2, MIN_Y + 180, 'button-primary')
       .setScale(0.8).setInteractive();
-    const btnSoundTxt = new PrimaryButtonText(this, DEFAULT_WIDTH / 2 - 120, MIN_Y - 30 + 180, `SOUND: ${game.enableSound ? ' ON' : 'OFF'}`)
+    const btnSoundTxt = new PrimaryButtonText(this, DEFAULT_WIDTH / 2 - 120, MIN_Y - 30 + 180, `SOUND: ${store?.app?.sound ? 'ON' : 'OFF'}`)
     btnSound.on('pointerdown', function (pointer) {
       btnSound.setAlpha(0.8)
       btnSoundTxt.setAlpha(0.8)
     });
     btnSound.on('pointerup', function (pointer) {
-      game.enableSound = !game.enableSound
-      btnSoundTxt.setText(`SOUND: ${game.enableSound ? 'ON' : 'OFF'}`)
+      store?.app?.setSound(!store?.app?.sound)
       btnSound.setAlpha(1)
       btnSoundTxt.setAlpha(1)
     });
@@ -55,6 +53,9 @@ export default class PreviewScene extends Phaser.Scene {
       btnInfo.setAlpha(1)
       btnInfoTxt.setAlpha(1)
     });
+    autorun(() => {
+      btnSoundTxt.setText(`SOUND: ${store?.app?.sound ? 'ON' : 'OFF'}`)
+    })
   }
 
   defaultPointerDown(btn, btnTxt) {

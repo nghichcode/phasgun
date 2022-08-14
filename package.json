@@ -39,6 +39,9 @@
   },
   "license": "MIT",
   "dependencies": {
+    "mobx": "^6.6.1",
+    "mobx-react-lite": "^3.4.0",
+    "mobx-state-tree": "^5.1.6",
     "phaser": "^3.55.2"
   },
   "devDependencies": {

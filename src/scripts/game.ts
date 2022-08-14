@@ -2,6 +2,7 @@ import 'phaser'
 import MainScene from './scenes/mainScene'
 import PreloadScene from './scenes/preloadScene'
 import PreviewScene from "./scenes/previewScene";
+import {setupRootStore} from "./models";
 
 export const DEFAULT_WIDTH = 1280
 export const DEFAULT_HEIGHT = 720
@@ -28,6 +29,7 @@ const config = {
 
 window.addEventListener('load', () => {
   const game = new Phaser.Game(config)
+  setupRootStore()
   window.addEventListener('keydown', (event) => {
     if (event.key === 'p') {
       game.scene.getScenes(false).forEach(it => {

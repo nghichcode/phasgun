@@ -3,6 +3,7 @@ import {DEFAULT_HEIGHT, DEFAULT_WIDTH} from "../game";
 import LandSmSprite, {generateRandomLandSmSprite} from "../objects/land-sm-sprite";
 import {generateFrameNames} from "../utils/utils";
 import {Bullet, Bullets} from "../objects/bullets";
+import PrimaryButtonText from "../objects/primaryButtonText";
 
 const CHARACTER_X = 100
 
@@ -42,38 +43,48 @@ export default class MainScene extends Phaser.Scene {
       .setScrollFactor(0, 0);
     this.fpsText = new FpsText(this)
     this.cursors = this.input.keyboard.createCursorKeys()
+    this.input.addPointer(1);
     this.platforms = this.physics.add.staticGroup();
     this.soundHit = this.sound.add('hit');
     this.soundShot = this.sound.add('shot');
     this.soundWhoosh = this.sound.add('whoosh');
     this.soundSpawn = this.sound.add('spawn');
 
-    for (let i = 0; i < 8; i++) {
-      this.generateFromPrevLand()
-    }
-
     game.btnA = this.add.sprite(1100, 620, 'button-primary')
       .setScale(0.5).setInteractive()
       .setScrollFactor(0, 0)
+      .setDepth(1)
+    const btnATxt = new PrimaryButtonText(this, 168, 590, 'Fire')
+    btnATxt.setScrollFactor(0, 0)
+      .setDepth(2)
+      .setFontSize(50)
     game.btnA.on('pointerdown', function (pointer) {
       game.isJump = true
+      btnATxt.setAlpha(0.8)
       game.btnA.setAlpha(0.8)
     });
     game.btnA.on('pointerup', function (pointer) {
       game.isJump = false
+      btnATxt.setAlpha(1)
       game.btnA.setAlpha(1)
     });
     game.btnB = this.add.sprite(200, 620, 'button-primary')
       .setScale(0.5).setInteractive()
       .setScrollFactor(0, 0)
-    global.btnA = this.btnA
+      .setDepth(1)
+    const btnBTxt = new PrimaryButtonText(this, 1058, 590, 'Jump')
+    btnBTxt.setScrollFactor(0, 0)
+      .setDepth(2)
+      .setFontSize(50)
     game.btnB.on('pointerdown', function (pointer) {
+      btnBTxt.setAlpha(0.8)
       game.soundSpawn.play()
       game.bullets.fireBullet(game.player.x + 20, game.player.y);
       game.isFire = true
       game.btnB.setAlpha(0.8)
     });
     game.btnB.on('pointerup', function (pointer) {
+      btnBTxt.setAlpha(1)
       game.isFire = false
       game.btnB.setAlpha(1)
     });
@@ -138,11 +149,16 @@ export default class MainScene extends Phaser.Scene {
       if (this.scene.isPaused()) this.scene.resume()
       else this.scene.pause()
     })
-    // this.input.on('pointer', (pointer) => {
-    //   console.log(1121)
-    //   this.player.anims.play('walking', true)
-    //   this.player.setVelocityX(MainScene.maxH)
-    // })
+
+    this.reloadScene()
+  }
+
+  reloadScene() {
+    this.landList.forEach(it => it.destroy())
+    this.landList = []
+    for (let i = 0; i < 8; i++) {
+      this.generateFromPrevLand()
+    }
   }
 
   update() {
@@ -176,7 +192,11 @@ export default class MainScene extends Phaser.Scene {
 
       this.generateFromPrevLand()
     }
-    if (player.y > this.maxY + DEFAULT_HEIGHT) this.scene.pause()
+    if (player.y > this.maxY + DEFAULT_HEIGHT) {
+      this.scene.pause()
+      this.scene.setActive(false)
+      this.scene.start('PreviewScene')
+    }
     this.background.setTilePosition(this.cameras.main.scrollX)
   }
 

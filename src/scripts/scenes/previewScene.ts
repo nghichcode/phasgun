@@ -28,7 +28,9 @@ export default class PreviewScene extends Phaser.Scene {
     btnPlay.on('pointerup', function (pointer) {
       btnPlay.setAlpha(1)
       btnPlayTxt.setAlpha(1)
-      game.scene.start('MainScene')
+      game.scene.setActive(false)
+      const mainScene = game.scene.get('MainScene')
+      mainScene.scene.restart()
     });
     const btnSound = this.add.sprite(DEFAULT_WIDTH / 2, MIN_Y + 180, 'button-primary')
       .setScale(0.8).setInteractive();

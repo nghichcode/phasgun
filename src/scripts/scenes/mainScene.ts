@@ -30,6 +30,7 @@ export default class MainScene extends Phaser.Scene {
   private isJump = false
   private isFire = false
   private btnB
+  private btnExit
 
   private cursors
   private maxY: number = 0
@@ -90,6 +91,24 @@ export default class MainScene extends Phaser.Scene {
       btnBTxt.setAlpha(1)
       game.isFire = false
       game.btnB.setAlpha(1)
+    });
+
+    game.btnExit = this.add.rectangle(1100, 60, 398, 176)
+      .setScale(0.5).setInteractive()
+      .setScrollFactor(0, 0)
+      .setDepth(1)
+    const btnExitTxt = new PrimaryButtonText(this, 1058, 30, 'Exit')
+    btnExitTxt.setScrollFactor(0, 0)
+      .setDepth(2)
+      .setFontSize(50)
+    game.btnExit.on('pointerdown', function (pointer) {
+      btnExitTxt.setAlpha(0.8)
+    });
+    game.btnExit.on('pointerup', function (pointer) {
+      btnExitTxt.setAlpha(1)
+      game.scene.pause()
+      game.scene.setActive(false)
+      game.scene.start('PreviewScene')
     });
 
     this.player = this.physics.add.sprite(CHARACTER_X, 440, 'wraith-pack', 'Wraith_01_Idle Blinking_001.png')

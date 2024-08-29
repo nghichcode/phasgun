@@ -4,6 +4,35 @@ export default class PreloadScene extends Phaser.Scene {
   }
 
   preload() {
+    const width = this.cameras.main.width;
+    const height = this.cameras.main.height;
+    const textStyle = {color: '#000000', fontSize: '28px', fontFamily: 'monospace' }
+    const loadingText = this.make.text({
+      x: width / 2,
+      y: height / 2 - 50,
+      text: "Loading...",
+      style: textStyle
+    });
+    loadingText.setOrigin(0.5, 0.5);
+    const percentText = this.make.text({
+      x: width / 2,
+      y: height / 2 - 5,
+      text: "0%",
+      style: textStyle
+    });
+    percentText.setOrigin(0.5, 0.5);
+
+    this.load.on("progress", function (value) {
+      percentText.setText(Math.ceil(Number(value) * 100) + "%");
+    });
+
+    this.load.on("fileprogress", function (file) {
+    });
+    this.load.on("complete", function () {
+      loadingText.destroy();
+      percentText.destroy();
+    });
+
     this.load.audio('hit', 'assets/sound/Hit.wav')
     this.load.audio('shot', 'assets/sound/Shot.wav')
     this.load.audio('whoosh', 'assets/sound/Whoosh.wav')

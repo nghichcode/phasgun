@@ -4,6 +4,7 @@ import LandSmSprite, {generateRandomLandSmSprite} from "../objects/land-sm-sprit
 import {generateFrameNames} from "../utils/utils";
 import {Bullet, Bullets} from "../objects/bullets";
 import PrimaryButtonText from "../objects/primaryButtonText";
+import { getRootStoreVal } from "../models";
 
 const CHARACTER_X = 100
 
@@ -12,6 +13,7 @@ export default class MainScene extends Phaser.Scene {
   private static DEFAULT_LAND_Y = 580
   private static maxH = 180
 
+  private store
   private fpsText
   private background
   public soundHit: Phaser.Sound.BaseSound
@@ -38,6 +40,7 @@ export default class MainScene extends Phaser.Scene {
 
   create() {
     const game = this
+    this.store = getRootStoreVal()
     this.background = this.add.tileSprite(0, 0, DEFAULT_WIDTH, DEFAULT_HEIGHT, "game_background")
       .setOrigin(0)
       .setScrollFactor(0, 0);
@@ -78,7 +81,7 @@ export default class MainScene extends Phaser.Scene {
       .setFontSize(50)
     game.btnB.on('pointerdown', function (pointer) {
       btnBTxt.setAlpha(0.8)
-      game.soundSpawn.play()
+      if (game?.store?.app?.sound) game.soundSpawn.play()
       game.bullets.fireBullet(game.player.x + 20, game.player.y);
       game.isFire = true
       game.btnB.setAlpha(0.8)
@@ -136,13 +139,13 @@ export default class MainScene extends Phaser.Scene {
     this.physics.add.collider(this.bullets, this.platforms, (_bulletObj, _platformsObj) => {
       if (_bulletObj) {
         const _bullet = (_bulletObj as Bullet)
-        if (_bullet.active) this.soundHit?.play()
+        if (_bullet.active && game?.store?.app?.sound) this.soundHit?.play()
         _bullet.anims.play('explosion-gas', true)
         _bullet.setVelocity(0, 0);
       }
     })
     this.input.keyboard.on('keydown-SPACE', (pointer) => {
-      this.soundSpawn.play()
+      if (game?.store?.app?.sound) this.soundSpawn.play()
       this.bullets.fireBullet(this.player.x + 20, this.player.y);
     })
     this.input.keyboard.on('keydown-P', (pointer) => {
@@ -181,7 +184,7 @@ export default class MainScene extends Phaser.Scene {
     }
 
     if (player.body.touching.down) {
-      this.soundWhoosh.play()
+      if (this?.store?.app?.sound) this.soundWhoosh.play()
       player.setVelocityY(-330)
     }
     const firstLand = this.landList.length > 0 ? this.landList[0] : null

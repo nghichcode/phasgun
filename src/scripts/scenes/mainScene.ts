@@ -26,10 +26,10 @@ export default class MainScene extends Phaser.Scene {
   private landList: Array<any> = []
   private bullets
 
-  private btnA
+  private btnFire
   private isJump = false
   private isFire = false
-  private btnB
+  private btnJump
   private btnExit
 
   private cursors
@@ -54,43 +54,44 @@ export default class MainScene extends Phaser.Scene {
     this.soundWhoosh = this.sound.add('whoosh');
     this.soundSpawn = this.sound.add('spawn');
 
-    game.btnA = this.add.sprite(1100, 620, 'button-primary')
+    game.btnFire = this.add.sprite(1100, 620, 'button-primary')
       .setScale(0.5).setInteractive()
       .setScrollFactor(0, 0)
       .setDepth(1)
-    const btnATxt = new PrimaryButtonText(this, 168, 590, 'Fire')
-    btnATxt.setScrollFactor(0, 0)
+    const btnFireTxt = new PrimaryButtonText(this, 1058, 590, 'Fire')
+    btnFireTxt.setScrollFactor(0, 0)
       .setDepth(2)
       .setFontSize(50)
-    game.btnA.on('pointerdown', function (pointer) {
-      game.isJump = true
-      btnATxt.setAlpha(0.8)
-      game.btnA.setAlpha(0.8)
-    });
-    game.btnA.on('pointerup', function (pointer) {
-      game.isJump = false
-      btnATxt.setAlpha(1)
-      game.btnA.setAlpha(1)
-    });
-    game.btnB = this.add.sprite(200, 620, 'button-primary')
-      .setScale(0.5).setInteractive()
-      .setScrollFactor(0, 0)
-      .setDepth(1)
-    const btnBTxt = new PrimaryButtonText(this, 1058, 590, 'Jump')
-    btnBTxt.setScrollFactor(0, 0)
-      .setDepth(2)
-      .setFontSize(50)
-    game.btnB.on('pointerdown', function (pointer) {
-      btnBTxt.setAlpha(0.8)
+    game.btnFire.on('pointerdown', function (pointer) {
+      btnFireTxt.setAlpha(0.8)
       if (game?.store?.app?.sound) game.soundSpawn.play()
       game.bullets.fireBullet(game.player.x + 20, game.player.y);
       game.isFire = true
-      game.btnB.setAlpha(0.8)
+      game.btnFire.setAlpha(0.8)
     });
-    game.btnB.on('pointerup', function (pointer) {
-      btnBTxt.setAlpha(1)
+    game.btnFire.on('pointerup', function (pointer) {
+      btnFireTxt.setAlpha(1)
       game.isFire = false
-      game.btnB.setAlpha(1)
+      game.btnFire.setAlpha(1)
+    });
+
+    game.btnJump = this.add.sprite(200, 620, 'button-primary')
+      .setScale(0.5).setInteractive()
+      .setScrollFactor(0, 0)
+      .setDepth(1)
+    const btnJumpTxt = new PrimaryButtonText(this, 158, 590, 'Jump')
+    btnJumpTxt.setScrollFactor(0, 0)
+      .setDepth(2)
+      .setFontSize(50)
+    game.btnJump.on('pointerdown', function (pointer) {
+      game.isJump = true
+      btnJumpTxt.setAlpha(0.8)
+      game.btnJump.setAlpha(0.8)
+    });
+    game.btnJump.on('pointerup', function (pointer) {
+      game.isJump = false
+      btnJumpTxt.setAlpha(1)
+      game.btnJump.setAlpha(1)
     });
 
     game.btnExit = this.add.rectangle(1100, 60, 398, 176)
